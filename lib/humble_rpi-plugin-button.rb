@@ -3,29 +3,18 @@
 # file: humble_rpi-plugin-button.rb
 
 
-require 'pi_piper'
+require 'rpi_pinin'
 
 
 class HumbleRPiPluginButton
-  include PiPiper
 
-  def initialize(settings: {}, variables: {})
 
-    @pins = settings[:pins]
+  def initialize(settings: {ignore_keyup: true}, variables: {})
+
+    @ignore_keyup = settings[:ignore_keyup] || true
+    @pins = settings[:pins].map {|x| RPiPinIn.new x, pull: :up}
     @notifier = variables[:notifier]
     @device_id = variables[:device_id] || 'pi'
-      
-    at_exit do
-      
-      @pins.each do |pin|
-
-        uexp = open("/sys/class/gpio/unexport", "w")
-        uexp.write(pin)
-        uexp.close
-      
-      end
-    end
-
     
   end
 
@@ -33,24 +22,44 @@ class HumbleRPiPluginButton
     
     notifier = @notifier
     device_id = @device_id
+    
+    t0 = Time.now + 1
         
     puts 'ready to detect buttons'
     
     @pins.each.with_index do |button, i|
       
       puts 'button %s on GPIO %s enabled ' % [i+1, button]
-      
+            
       n = (i+1).to_s
-      
-      PiPiper.watch :pin => button.to_i, :invert => true do |pin|
+            
+      Thread.new do      
         
-        notifier.notice "%s/button/%s: value %s" % [device_id, i, pin.value]
+        button.watch do |value|
+          
+          # ignore any movements that happened 250 
+          #               milliseconds ago since the last movement
+          if t0 + 0.25 < Time.now then                   
+              
+            state = case value
+            when 1
+              @ignore_keyup ? :press : :down
+            when 0
+              :up unless @ignore_keyup
+            end
 
-      end
+            if state            
+              notifier.notice "%s/button/%s: key%s" % [device_id, i, state]
+            end
+            
+            t0 = Time.now
+            
+          end
+        end
+        
+      end      
       
-    end
-    
-    PiPiper.wait    
+    end    
 
     
   end

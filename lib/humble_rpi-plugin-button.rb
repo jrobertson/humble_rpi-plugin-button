@@ -3,66 +3,48 @@
 # file: humble_rpi-plugin-button.rb
 
 
-require 'rpi_pinin'
+require 'rpi_pinin_msgout'
 
 
 class HumbleRPiPluginButton
 
 
-  def initialize(settings: {ignore_keyup: true}, variables: {})
+  def initialize(settings: {}, variables: {}, verbose: false)
+    
+    pins = settings[:pins]
+    settings.delete :pins
+    
+    h1 = {
+      capture_rate: 0.25, # seconds
+      mode: :default
+      }.merge settings
 
-    @ignore_keyup = settings[:ignore_keyup] || true
-    @pins = settings[:pins].map {|x| RPiPinIn.new x, pull: :up}
-    @notifier = variables[:notifier]
-    @device_id = variables[:device_id] || 'pi'
+    h2 = {device_id: 'pi'}.merge variables
+    
+    h3 = {
+      pull: :up, 
+      subtopic: 'button', 
+      descriptor: 'pressed',
+      verbose: verbose
+    }
+        
+    h = h1.merge(h2).merge(h3)
+    
+    @pins = pins.map.with_index do |x,i|
+      
+      RPiPinInMsgOut.new x, h.merge(index: i+1)
+      
+    end    
     
   end
-
+    
   def start()
-    
-    notifier = @notifier
-    device_id = @device_id
-    
-    t0 = Time.now + 1
         
     puts 'ready to detect buttons'
     
-    @pins.each.with_index do |button, i|
-      
-      puts 'button %s on GPIO %s enabled ' % [i+1, button]
-            
-      n = (i+1).to_s
-            
-      Thread.new do      
-        
-        button.watch do |value|
-          
-          # ignore any movements that happened 250 
-          #               milliseconds ago since the last movement
-          if t0 + 0.25 < Time.now then                   
-              
-            state = case value
-            when 1
-              @ignore_keyup ? :press : :down
-            when 0
-              :up unless @ignore_keyup
-            end
+    @pins.each {|pin| Thread.new { pin.capture} }
 
-            if state            
-              notifier.notice "%s/button/%s: key%s" % [device_id, i, state]
-            end
-            
-            t0 = Time.now
-            
-          end
-        end
-        
-      end      
-      
-    end    
-
-    
-  end
+  end  
   
   alias on_start start
   

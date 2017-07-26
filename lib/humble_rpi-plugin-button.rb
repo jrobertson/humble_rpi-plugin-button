@@ -30,9 +30,23 @@ class HumbleRPiPluginButton
         
     h = h1.merge(h2).merge(h3)
     
-    @pins = pins.map.with_index do |x,i|
+    @pins = pins.map.with_index do |x,i|            
       
-      RPiPinInMsgOut.new x, h.merge(index: i+1)
+      params = {}
+      if x.is_a? String or x.is_a? Integer then
+        
+        pin, params = x, h
+        
+      elsif x.is_a? Hash
+        
+        pin = x.keys.first.to_s
+        params = h.merge(id: x.values.first.to_s)
+        params.merge!({mode: x[:mode]}) if x[:mode]
+        params.merge!({capture_rate: x[:capture_rate]}) if x[:capture_rate]
+              
+      end
+
+      RPiPinInMsgOut.new pin, params.merge(index: i+1)
       
     end    
     

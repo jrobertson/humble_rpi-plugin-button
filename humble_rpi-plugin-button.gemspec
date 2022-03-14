@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'humble_rpi-plugin-button'
-  s.version = '0.4.0'
+  s.version = '0.4.1'
   s.summary = 'A humble_rpi plugin which detects a button press.'
   s.authors = ['James Robertson']
   s.files = Dir['lib/humble_rpi-plugin-button.rb']
@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
   s.signing_key = '../privatekeys/humble_rpi-plugin-button.pem'
   s.cert_chain  = ['gem-public_cert.pem']
   s.license = 'MIT'
-  s.email = 'james@jamesrobertson.eu'
+  s.email = 'digital.robertson@gmail.com'
   s.homepage = 'https://github.com/jrobertson/humble_rpi-plugin-button'
 end

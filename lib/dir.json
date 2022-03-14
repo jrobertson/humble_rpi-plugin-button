@@ -1,0 +1,29 @@
+{
+  "directory": {
+    "summary": {
+      "schema": "directory[title, file_path,  last_modified, description]/file(name, type, ext, mtime, description)",
+      "recordx_type": "dynarex",
+      "default_key": "name",
+      "title": "Index of /home/james/gem_src/humble_rpi-plugin-button/lib",
+      "file_path": "/home/james/gem_src/humble_rpi-plugin-button/lib",
+      "last_modified": "2022-03-06 12:20:41 +0000",
+      "description": null
+    },
+    "records": [
+      {
+        "file": {
+          "id": "1",
+          "created": "2022-03-06 12:20:41 +0000",
+          "last_modified": null,
+          "body": {
+            "name": "humble_rpi-plugin-button.rb",
+            "type": "file",
+            "ext": ".rb",
+            "mtime": "2019-11-22 17:35:29 +0000",
+            "description": ""
+          }
+        }
+      }
+    ]
+  }
+}
